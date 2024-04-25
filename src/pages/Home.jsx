@@ -1,22 +1,25 @@
-import { useState } from "react";
 import { useFormik } from "formik";
 import { v4 as uuidv4 } from "uuid";
+import { useSelector, useDispatch } from "react-redux";
+import { addProduct, getCollection } from "../redux/products/middleware";
+import { useEffect } from "react";
 
 const Home = () => {
-  const [products, setProducts] = useState([
-    { id: uuidv4(), name: "Product 1", price: 10 },
-    { id: uuidv4(), name: "Product 2", price: 20 },
-    { id: uuidv4(), name: "Product 3", price: 30 },
-  ]);
+  const dispatch = useDispatch();
+  const { products } = useSelector(
+    (productsReducer) => productsReducer.products
+  );
 
   const initialValues = { name: "", price: "" };
 
   const formik = useFormik({
     initialValues,
-    onSubmit: (values, { resetForm }) => {
-      const newProduct = { id: uuidv4(), ...values };
-      setProducts([...products, newProduct]);
-      resetForm();
+    onSubmit: (values, { resetForm, setSubmitting }) => {
+      const newProduct = { ...values };
+      console.log("newProduct", newProduct);
+      dispatch(addProduct(newProduct));
+      setSubmitting(true);
+      //resetForm();
     },
   });
 
@@ -32,10 +35,20 @@ const Home = () => {
     setProducts(updatedProducts);
   };
 
+  useEffect(() => {
+    dispatch(getCollection());
+  }, [dispatch]);
+
   return (
     <div className="container mx-auto">
       <h1 className="text-2xl font-bold mb-4">Product Management</h1>
-      <form onSubmit={formik.handleSubmit} className="mb-4">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          formik.handleSubmit(e);
+        }}
+        className="mb-4"
+      >
         <input
           type="text"
           name="name"
@@ -62,23 +75,23 @@ const Home = () => {
       <ul>
         {products.map((product) => (
           <li key={product.id} className="border p-2 mb-2">
-            <form onSubmit={formik.handleSubmit}>
+            <form>
               <input
                 type="text"
                 name="name"
                 className="mr-2 p-2 border rounded"
                 onChange={formik.handleChange}
-                value={formik.values.name}
+                value={product.name || formik.values.name}
               />
               <input
                 type="number"
                 name="price"
                 className="mr-2 p-2 border rounded"
                 onChange={formik.handleChange}
-                value={formik.values.price}
+                value={product.price || formik.values.price}
               />
               <button
-                type="submit"
+                type="button"
                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
               >
                 Save
