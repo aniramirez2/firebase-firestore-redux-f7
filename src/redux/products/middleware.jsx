@@ -5,7 +5,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  setDoc
+  setDoc,
 } from "firebase/firestore";
 import { firestore } from "../../firebase/firebaseconfig";
 import { addProductSlice, setProduct } from "./slice";
@@ -14,7 +14,7 @@ const COLLECTION = collection(firestore, COLLECTION_NAME);
 
 export const getCollection = () => {
   return async (dispatch) => {
-    const q = query(collection(firestore, COLLECTION_NAME));
+    const q = query(COLLECTION);
 
     const querySnapshot = await getDocs(q);
     const arr = [];
@@ -45,6 +45,6 @@ export const editProducts = (productosActualizados, id, values) => {
   const documentRef = doc(COLLECTION, id);
   return async (dispatch) => {
     dispatch(setProduct(productosActualizados));
-    await setDoc( documentRef, values);
+    await setDoc(documentRef, values);
   };
 };
